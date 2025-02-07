@@ -8,8 +8,12 @@ Parameters(total_amount,transaction_uuid,product_code) should be mandatory and s
 
 // creating the secret key to send the request to the esewa merchant account 
 
-const axios = require("axios")
-const crypto = require("crypto")
+import axios from "axios"
+import crypto from "crypto"
+
+const headersList = {
+    "Content-Type" :"application/json"
+}
 
 
  export async function HashEsewaPayment (amount, transaction_id){
@@ -21,6 +25,7 @@ const crypto = require("crypto")
             "sha256", process.env.ESEWA_SECRET_KEY
         ).update(data).digest("base64")
 
+        
         return {
             signature : hash,
             signed_field_names :"total_amount, transaction_uuidm product_code"
@@ -60,7 +65,7 @@ export async function verifyEsewaRequest (encodedKey){
 
 */
  let reqOptions = {
-    url : `${process.env.ESEWA_GATEWAY_URL}/api/epay.transaction/status/?product_code= ${process.env.ESEWA_PRODUCT_CODE}&total_amount= ${decodedData.total_amount}&transaction_uuid=${decodedData.transaction_uuid}`
+    url : `${process.env.ESEWA_GATEWAY_URL}/api/epay/transaction/status/?product_code= ${process.env.ESEWA_PRODUCT_CODE}&total_amount= ${decodedData.total_amount}&transaction_uuid=${decodedData.transaction_uuid}`
 , method :"GET",
 headers : headersList
  }
@@ -81,3 +86,25 @@ if (
   throw error;
  }
 }
+
+/*
+{
+"amount": "100",
+"failure_url": "https://developer.esewa.com.np/failure",
+"product_delivery_charge": "0",
+"product_service_charge": "0",
+"product_code": "EPAYTEST",
+"signature": "i94zsd3oXF6ZsSr/kGqT4sSzYQzjj1W/waxjWyRwaME=",
+"signed_field_names": "total_amount,transaction_uuid,product_code",
+"success_url": "https://developer.esewa.com.np/success",
+"tax_amount": "10",
+"total_amount": "110",
+"transaction_uuid": "241028"
+}
+
+*/
+
+
+ 
+
+

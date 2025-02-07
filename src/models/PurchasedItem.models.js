@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose"
 
 const purchasedItemSchema = new mongoose.Schema({
   item: { type: mongoose.Schema.Types.ObjectId, ref: "Item", required: true },
@@ -8,5 +8,4 @@ const purchasedItemSchema = new mongoose.Schema({
   status: { type: String, enum: ["pending", "completed", "refunded"], default: "pending" },
 }, { timestamps: true });
 
-const PurchasedItem = mongoose.model("PurchasedItem", purchasedItemSchema);
-module.exports = PurchasedItem;
+ export const PurchasedItem = mongoose.model("PurchasedItem", purchasedItemSchema);

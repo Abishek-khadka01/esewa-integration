@@ -1,5 +1,4 @@
-const mongoose = require("mongoose");
-
+import mongoose from "mongoose"
 const paymentSchema = new mongoose.Schema(
   {
     transactionId: { type: String, unique: true },
@@ -26,5 +25,4 @@ const paymentSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-const Payment = mongoose.model("payment", paymentSchema);
-module.exports = Payment;
+ export const Payment = mongoose.model("payment", paymentSchema);
