@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Cards</title>
+    <script src="https://cdn.tailwindcss.com"></script> <!-- Tailwind CDN -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        star: '#FFD700' // Gold color for stars
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+<body class="bg-gray-100 p-6">
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Page Title -->
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Product List</h1>
+
+        <!-- Grid Layout for Products -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <% items.forEach(function(item) { %>
+                <!-- Clickable Product Card -->
+                <a href="/product/<%= item._id %>" class="block bg-white shadow-md rounded-lg p-4 transition transform hover:scale-105 hover:shadow-lg">
+                    
+                    <!-- Product Image -->
+                    <div class="h-48 w-full overflow-hidden rounded-md">
+                        <img src="<%= item.image %>" alt="<%= item.title %>" class="w-full h-full object-cover">
+                    </div>
+                    
+                    <!-- Product Details -->
+                    <div class="mt-3">
+                        <!-- Title -->
+                        <h2 class="text-lg font-semibold text-gray-700"><%= item.title %></h2>
+
+                        <!-- Category -->
+                        <p class="text-gray-500 text-sm mt-1"><strong>Category:</strong> <%= item.category %></p>
+
+                        <!-- Rating -->
+                        <div class="flex items-center mt-2">
+                            <% for(let i = 1; i <= 5; i++) { %>
+                                <% if(i <= Math.round(item.rating.rate)) { %>
+                                    <span class="text-star text-xl">★</span> <!-- Filled Star -->
+                                <% } else { %>
+                                    <span class="text-gray-300 text-xl">★</span> <!-- Empty Star -->
+                                <% } %>
+                            <% } %>
+                            <span class="ml-2 text-gray-600">(<%= item.rating.rate %>/5)</span>
+                        </div>
+
+                        <!-- Price -->
+                        <p class="text-gray-800 text-lg font-bold mt-2">$<%= item.price %></p>
+                    </div>
+                </a>
+            <% }); %>
+        </div>
+    </div>
+
+</body>
+</html>

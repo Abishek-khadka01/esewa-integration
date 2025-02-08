@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details</title>
+    <script src="https://cdn.tailwindcss.com"></script> <!-- Tailwind CDN -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        star: '#FFD700' // Gold color for stars
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-6">
+
+    <div class="max-w-3xl w-full bg-white shadow-lg rounded-lg p-6">
+        <!-- Product Image -->
+        <div class="flex justify-center">
+            <img src="<%= item.image %>" alt="<%= item.title %>" class="w-80 h-80 object-cover rounded-md shadow-md">
+        </div>
+
+        <!-- Product Details -->
+        <div class="mt-6 text-center">
+            <!-- Product Title -->
+            <h1 class="text-2xl font-bold text-gray-800"><%= item.title %></h1>
+
+            <!-- Category -->
+            <p class="text-gray-500 text-sm mt-1"><strong>Category:</strong> <%= item.category %></p>
+
+            <!-- Rating -->
+            <div class="flex justify-center items-center mt-2">
+                <% for(let i = 1; i <= 5; i++) { %>
+                    <% if(i <= Math.round(item.rating.rate)) { %>
+                        <span class="text-star text-2xl">★</span> <!-- Filled Star -->
+                    <% } else { %>
+                        <span class="text-gray-300 text-2xl">★</span> <!-- Empty Star -->
+                    <% } %>
+                <% } %>
+                <span class="ml-2 text-gray-600">(<%= item.rating.rate %>/5, <%= item.rating.count %> reviews)</span>
+            </div>
+
+            <!-- Price -->
+            <p class="text-gray-800 text-xl font-bold mt-4">$<%= item.price %></p>
+
+            <!-- Description -->
+            <p class="text-gray-700 mt-3 text-sm leading-relaxed px-4"><%= item.description %></p>
+
+            <!-- Buy Button -->
+            <button class="mt-6 w-3/4 bg-blue-500 text-white py-3 rounded-lg shadow-md hover:bg-blue-700 transition">
+                Buy Now
+            </button>
+        </div>
+    </div>
+
+</body>
+</html>

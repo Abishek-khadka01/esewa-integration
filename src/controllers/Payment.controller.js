@@ -117,17 +117,10 @@ import {PurchasedItem } from  "../models/PurchasedItem.models.js"
 const findAllProducts = async (req,res)=>{
     try {
         const items = await Item.find()
-        res.status(200).json({
-            success : true,
-            message :"Items found",
-            items
-        })
+        res.render("Cards.ejs",{items})
     } catch (error) {
         console.log(error)
-        res.status(500).json({
-            success : false
-            ,message :"Internal Server Error"
-        })
+        res.render("error.ejs")
     }
 }
 

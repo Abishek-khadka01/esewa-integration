@@ -3,7 +3,7 @@ import dotenv from "dotenv"
 dotenv.config()
 import path from "path"
 import mongoose from "mongoose"
-const __dirname = path.join(import.meta.url)
+const __dirname = path.join(import.meta.dirname)
 const app = express()
 app.use(express.json())
 app.use(express.urlencoded())
@@ -32,8 +32,8 @@ app.set('view engine', 'ejs');
 } )()
 
 // creating the fake products
-// import s{createFakeItems} from "./utils/dummydata.js"
-// createFakeItems(10)
+// import { createFakeItemsData } from "./utils/dummydata.js"
+// createFakeItemsData()
 
 import { PaymentRouter } from "./Routes/Payment.routes.js"
 app.use("/", PaymentRouter)

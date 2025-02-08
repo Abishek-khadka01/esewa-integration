@@ -1,23 +1,31 @@
-import {faker} from "@faker-js/faker"
-import {Item} from "../models/item.models"
-// Define categories
-const categories = ['Electronics', 'Clothing', 'Home & Kitchen', 'Books', 'Toys', 'Sports'];
+import axios from "axios";
+import { Item } from "../models/item.models.js";
 
-// Function to create fake items
-   export  async function createFakeItems(numItems) {
-    const items = [];
-    for (let i = 0; i < numItems; i++) {
-        const item =  Item.create({
-            name: faker.commerce.productName(), // Generates a random product name
-            price: parseFloat(faker.commerce.price()), // Generates a random price
-            category: categories[Math.floor(Math.random() * categories.length)] // Randomly selects a category
+export const createFakeItemsData = async () => {
+    try {
+        const response = await axios.get("https://fakestoreapi.com/products");
+        const items = response.data; 
+
+        const promiseItems = items.map(({ title, price, description, category, image, rating }) => {
+            return Item.create({
+                name: title,
+                price,
+                description,
+                category,
+                image,
+                rating: {
+                    rate: rating.rate,
+                    count: rating.count
+                }
+            });
         });
-        items.push(item);
+
+        await Promise.all(promiseItems);
+
+        console.log("Items are generated");
+    } catch (error) {
+        console.error("Error generating items:", error);
+    } finally {
+        process.exit(0);
     }
-    await Promise.all(items)
-    
-    process.exit(0)
-}
-
-
-
+};
