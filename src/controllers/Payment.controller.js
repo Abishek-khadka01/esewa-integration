@@ -1,10 +1,12 @@
 import {verifyEsewaRequest , HashEsewaPayment }  from "./esewaHandler.js"
 import {Item}  from "../models/item.models.js"
+import {v4} from "uuid"
 import {PurchasedItem } from  "../models/PurchasedItem.models.js"
  async function InitializePayment  (req,res){
     try {
-        const {itemId, totalPrice } = req.body;
-        if(!itemId  || !totalPrice){
+        console.log('Initialize payment hit ', req.body)
+        const {itemID, totalPrice } = req.body;
+        if(!itemID  || !totalPrice){
             console.log(`NO either itemid or totalPrice`)
             res.status(400).json({
                 success : false,
@@ -12,41 +14,33 @@ import {PurchasedItem } from  "../models/PurchasedItem.models.js"
             })
         }
 
-        const item = await Item.findOne({
-            _id: itemId,
-            price : Number(totalPrice)
-        })
-        if(!item){
-            console.log(`NO such item exist`)
-            res.status(401).json({
-                success : false,
-                message :"NO item found"
-            })
-        }
-
         // Create a record for the purchase
         const purchasedItemdata = await PurchasedItem.create({
-            item : itemId,
+            item : itemID,
             paymentMethod :"esewa",
             totalPrice : totalPrice
         }) 
+        console.log(`payment Item data created`)
 
-        
-    const paymentInitiate = await HashEsewaPayment(totalPrice, purchasedItemdata._id)
-
+        const setData = v4()
+        console.log(`setData is ${setData}`)           
+    const paymentInitiate =  HashEsewaPayment(totalPrice,setData )
+        console.log(paymentInitiate.signature)
         if(!paymentInitiate){
             console.log(`Error in the   payment `)
             res.status(500).json({
                 success : false,
-                message :"the payment was failed"
+                message :"the payment was failed",
+             
             }
             )
         }
-
+        console.log(paymentInitiate)
         res.status(200).json({
             success : true,
             payment : paymentInitiate,
-            purchasedItemdata
+            purchasedItemdata,
+            setData
         })
 
         

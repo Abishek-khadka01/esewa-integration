@@ -4,59 +4,149 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Details</title>
-    <script src="https://cdn.tailwindcss.com"></script> <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        star: '#FFD700' // Gold color for stars
+                        star: '#FFD700'
                     }
                 }
+            }
+        };
+
+        const handleSubmit = async (event) => {
+            try {
+                event.preventDefault();  // Prevent default form submission
+                
+                const button = event.target;  // Get button reference
+                button.disabled = true;
+                button.innerHTML = 'Processing...';
+
+                const itemID = "<%= item._id %>";
+                const totalPrice = "<%= item.price %>";
+
+                if (!itemID || !totalPrice) {
+                    throw new Error('Missing required product information');
+                }
+
+                // Make API call to initialize eSewa
+                const response = await axios.post("http://localhost:4000/initialize-esewa", {
+                    itemID,
+                    totalPrice
+                }, {
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (!response.data || !response.data.payment) {
+                    throw new Error('Invalid payment response');
+                }
+
+                const { signature, signed_field_names } = response.data.payment;
+                console.log(signature)
+                const { _id } = response.data.purchasedItemdata;
+
+                // Update form fields
+                document.getElementById('amount').value = "<%=item.price %>";
+                document.getElementById('signed_field_names').value = signed_field_names;
+                document.getElementById('transaction_uuid').value = response.data.setData;
+                document.getElementById('signature').value = signature;  
+
+                // Calculate total with tax
+                const taxAmount = parseFloat(document.getElementById('tax_amount').value);
+                const totalAmount = (parseFloat(totalPrice) + taxAmount).toFixed(2);
+                console.log(totalAmount)
+                document.getElementById('total_amount').value = totalAmount;
+
+                // Submit the form
+                document.getElementById('paymentForm').submit();
+
+            } catch (error) {
+                console.error('Payment processing error:', error);
+                alert('There was an error processing your payment. Please try again.');
+
+                // Reset button state
+                const button = event.target;
+                button.disabled = false;
+                button.innerHTML = 'Buy Now';
             }
         };
     </script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-6">
-
     <div class="max-w-3xl w-full bg-white shadow-lg rounded-lg p-6">
         <!-- Product Image -->
         <div class="flex justify-center">
-            <img src="<%= item.image %>" alt="<%= item.title %>" class="w-80 h-80 object-cover rounded-md shadow-md">
+            <img id="productImage" src="<%= item.image %>" alt="<%= item.title %>" 
+                 class="w-80 h-80 object-cover rounded-md shadow-md">
         </div>
 
         <!-- Product Details -->
         <div class="mt-6 text-center">
-            <!-- Product Title -->
             <h1 class="text-2xl font-bold text-gray-800"><%= item.title %></h1>
-
-            <!-- Category -->
-            <p class="text-gray-500 text-sm mt-1"><strong>Category:</strong> <%= item.category %></p>
+            <p class="text-gray-500 text-sm mt-1">
+                <strong>Category:</strong> <span id="category"><%= item.category %></span>
+            </p>
 
             <!-- Rating -->
             <div class="flex justify-center items-center mt-2">
-                <% for(let i = 1; i <= 5; i++) { %>
-                    <% if(i <= Math.round(item.rating.rate)) { %>
-                        <span class="text-star text-2xl">★</span> <!-- Filled Star -->
-                    <% } else { %>
-                        <span class="text-gray-300 text-2xl">★</span> <!-- Empty Star -->
+                <div id="ratingStars">
+                    <% for(let i = 1; i <= 5; i++) { %>
+                        <% if(i <= Math.round(item.rating.rate)) { %>
+                            <span class="text-star text-2xl">★</span>
+                        <% } else { %>
+                            <span class="text-gray-300 text-2xl">★</span>
+                        <% } %>
                     <% } %>
-                <% } %>
-                <span class="ml-2 text-gray-600">(<%= item.rating.rate %>/5, <%= item.rating.count %> reviews)</span>
+                </div>
+                <span class="ml-2 text-gray-600">
+                    (<span id="rating"><%= item.rating.rate %></span>/5, 
+                    <span id="reviewCount"><%= item.rating.count %></span> reviews)
+                </span>
             </div>
 
             <!-- Price -->
-            <p class="text-gray-800 text-xl font-bold mt-4">$<%= item.price %></p>
+            <p class="text-gray-800 text-xl font-bold mt-4">
+                $<span id="itemPrice"><%= item.price %></span>
+            </p>
 
             <!-- Description -->
-            <p class="text-gray-700 mt-3 text-sm leading-relaxed px-4"><%= item.description %></p>
+            <p class="text-gray-700 mt-3 text-sm leading-relaxed px-4" id="description">
+                <%= item.description %>
+            </p>
 
             <!-- Buy Button -->
-            <button class="mt-6 w-3/4 bg-blue-500 text-white py-3 rounded-lg shadow-md hover:bg-blue-700 transition">
+            <button onclick="handleSubmit(event)"
+                    class="mt-6 w-3/4 bg-blue-500 text-white py-3 rounded-lg shadow-md 
+                           hover:bg-blue-700 transition disabled:opacity-50 
+                           disabled:cursor-not-allowed">
                 Buy Now
             </button>
         </div>
-    </div>
 
+        <!-- Hidden Payment Form -->
+        <form action="https://rc-epay.esewa.com.np/api/epay/main/v2/form" 
+              method="POST" 
+              id="paymentForm" 
+              class="hidden">
+            <input type="hidden" id="itemID" name="itemID" value="<%= item._id %>">
+            <input type="hidden" id="amount" name="amount" value="100" required>
+            <input type="hidden" id="tax_amount" name="tax_amount" value="10" required>
+            <input type="hidden" id="total_amount" name="total_amount" required>
+            <input type="hidden" id="transaction_uuid" name="transaction_uuid" required>
+            <input type="hidden" id="product_code" name="product_code" value="EPAYTEST" required>
+            <input type="hidden" id="product_service_charge" name="product_service_charge" value="0" required>
+            <input type="hidden" id="product_delivery_charge" name="product_delivery_charge" value="0" required>
+            <input type="hidden" id="success_url" name="success_url" 
+                   value="https://developer.esewa.com.np/success" required>
+            <input type="hidden" id="failure_url" name="failure_url" 
+                   value="https://developer.esewa.com.np/failure" required>
+            <input type="hidden" id="signed_field_names" name="signed_field_names" required>
+            <input type="hidden" id="signature" name="signature"  required>
+        </form>
+    </div>
 </body>
 </html>

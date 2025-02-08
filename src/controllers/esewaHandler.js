@@ -7,33 +7,33 @@ Parameters(total_amount,transaction_uuid,product_code) should be mandatory and s
 
 
 // creating the secret key to send the request to the esewa merchant account 
-
-import axios from "axios"
 import crypto from "crypto"
+import axios from "axios"
+import CryptoJS from "crypto-js";
 
 const headersList = {
     "Content-Type" :"application/json"
 }
 
 
- export async function HashEsewaPayment (amount, transaction_id){
+ export  function HashEsewaPayment (amount, transaction_id){
 
     try {
-        const data = `total_amount=${amount},transaction_uuid=${transaction_id}, product_code=${process.env.ESEWA_PRODUCT_CODE}`
+        const total_amount =  (parseFloat(amount) + 10).toFixed(2);
+        console.log(total_amount)
+        const data = `total_amount=${total_amount},transaction_uuid=${transaction_id}, product_code=${process.env.ESEWA_PRODUCT_CODE}`
 
-        const hash = crypto.createHmac(
-            "sha256", process.env.ESEWA_SECRET_KEY
-        ).update(data).digest("base64")
-
-        
+        var hash = CryptoJS.HmacSHA256(data,process.env.ESEWA_SECRET_KEY)
+        var hashinBase64 = CryptoJS.enc.Base64.stringify(hash)
         return {
-            signature : hash,
-            signed_field_names :"total_amount, transaction_uuidm product_code"
+            signature : hashinBase64,
+            signed_field_names :"total_amount,transaction_uuid,product_code"
         }
 
 
 
     } catch (error) {
+        console.log(error.message)
             throw error
     }
 
